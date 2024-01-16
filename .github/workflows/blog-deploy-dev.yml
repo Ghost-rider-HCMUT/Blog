@@ -41,6 +41,7 @@ jobs:
           nvm install 18
           nvm use 18
           yarn install
+          node ./scripts/postContentlayer.mjs
           yarn build
 
       - name: Deploy using AWSCLI
