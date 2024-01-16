@@ -45,10 +45,10 @@ jobs:
 
       - name: Deploy using AWSCLI
         run: |
-          echo Start Deploying !!!
+          echo Start Deploying !!!  
           pwd
           ls -ltr
-          cd build && cp index.html 200.html
+          cd out && cp index.html 200.html
           aws s3 sync --delete . $AWS_S3_BUCKET --region $AWS_S3_REGION --cache-control max-age=31536000,public
           aws configure set preview.cloudfront true
           aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths '/*'
