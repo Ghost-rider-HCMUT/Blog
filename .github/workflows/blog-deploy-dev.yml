@@ -1,0 +1,54 @@
+name: CI/CD Deploy mvp-blog on to develop
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+    
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+#defile variables for aws
+env:
+  AWS_S3_BUCKET: s3://mvp-blog-ap-southeast-1
+  AWS_S3_REGION: ap-southeast-1
+  AWS_CLOUDFRONT_DISTRIBUTION_ID: E18ZZVKKWHP5I0
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.AWS_REGION }} 
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+
+  build:
+    name: Building phase
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a set of commands using the runners shell
+      - name: Building phase
+        run: |
+          echo Start Building !!!
+          pwd
+          ls -ltr
+          w
+          . ~/.nvm/nvm.sh
+          . ~/.profile
+          . ~/.bashrc
+          nvm install 18
+          nvm use 18
+          yarn install
+          yarn build
+
+      - name: Deploy using AWSCLI
+        run: |
+          echo Start Deploying !!!
+          pwd
+          ls -ltr
+          cd build && cp index.html 200.html
+          aws s3 sync --delete . $AWS_S3_BUCKET --region $AWS_S3_REGION --cache-control max-age=31536000,public
+          aws configure set preview.cloudfront true
+          aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths '/*'
